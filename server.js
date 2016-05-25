@@ -66,7 +66,7 @@ app.get('/logs/:id',
         }
       });
     } catch (e) {
-      res.json(err);
+      res.json(e);
     }
   });
 
