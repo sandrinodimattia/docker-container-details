@@ -31,6 +31,9 @@
               <a href="#network" data-toggle="tab" aria-expanded="false">Network</a>
             </li>
             <li class="">
+              <a href="#files" data-toggle="tab" aria-expanded="false">Files</a>
+            </li>
+            <li class="">
               <a href="#containers" data-toggle="tab" aria-expanded="false">Containers</a>
             </li>
           </ul>
@@ -87,6 +90,25 @@
                 </table>
               </div>
             </div>
+            <div class="tab-pane" id="files">
+              <div class="row" style="margin-top: 20px;">
+                <div class="col-lg-12">
+                  <h4 class="pull-left">Files in <span class="label label-warning">/var/data</span></h4>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered" style="margin-top: 20px;">
+                  <tbody>
+                    {{#each files}}
+                    <tr>
+                      <td>{{this}}</td>
+                      <td style="width: 15px"><button data-file="{{this}}" class="file-open btn btn-xs btn-primary">View</button></td>
+                    </tr>
+                    {{/each}}
+                  </tbody>
+                </table>
+              </div>
+            </div>
             <div class="tab-pane" id="containers">
               <div style="margin-top: 20px;">
                 {{#each containers}}
@@ -111,15 +133,15 @@
         </div>
       </div>
     </div>
-    <div class="modal" id="container-modal" tabindex="-1" role="dialog">
+    <div class="modal" id="modal" tabindex="-1" role="dialog">
       <div class="modal-dialog" style="width: 90% !important;">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="container-id"></h4>
+            <h4 class="modal-title" id="modal-title"></h4>
           </div>
           <div class="modal-body">
-            <pre id="container-modal-contents" style="font-size: 12px; margin-top: 20px; margin-bottom: 20px;"></pre>
+            <pre id="modal-contents" style="font-size: 12px; margin-top: 20px; margin-bottom: 20px;"></pre>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -132,14 +154,34 @@
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
   <script type="text/javascript">
   $(function() {
+    var hash = document.location.hash;
+    if (hash) {
+      $('.nav-tabs a[href='+hash+']').tab('show');
+    }
+
+    $('.nav-tabs a').on('click', function (e) {
+      window.location.hash = e.target.hash;
+    });
+
+    $('.file-open').click(function(e) {
+      e.preventDefault();
+
+      var fileName = $(this).data('file');
+      $('#modal-title').text(fileName);
+      $('#modal').modal('show');
+      $.get('/file/' + encodeURIComponent(fileName), function(data) {
+        $('#modal-contents').html(data);
+      });
+    });
+
     $('.docker-inspect').click(function(e) {
       e.preventDefault();
 
       var containerId = $(this).data('container-id');
-      $('#container-id').text(containerId);
-      $('#container-modal').modal('show');
+      $('#modal-title').text(containerId);
+      $('#modal').modal('show');
       $.get('/inspect/' + containerId, function(data) {
-        $('#container-modal-contents').html(JSON.stringify(data, null, 2));
+        $('#modal-contents').html(JSON.stringify(data, null, 2));
       });
     });
 
@@ -147,10 +189,10 @@
       e.preventDefault();
 
       var containerId = $(this).data('container-id');
-      $('#container-id').text(containerId);
-      $('#container-modal').modal('show');
+      $('#modal-title').text(containerId);
+      $('#modal').modal('show');
       $.get('/logs/' + containerId, function(data) {
-        $('#container-modal-contents').html(data);
+        $('#modal-contents').html(data);
       });
     });
   })

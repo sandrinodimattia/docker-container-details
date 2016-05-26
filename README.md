@@ -11,6 +11,7 @@ In addition to that you can also:
  - List all containers
  - Inspect a container
  - View logs for a container
+ - Mount a volume on `/var/data`, list the contents and open files
 
 This can be useful when deploying containers in a cluster environment and you want to get more information about the current environment (eg: environment variables related to service discovery).
 
